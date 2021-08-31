@@ -1,0 +1,6 @@
+node_modules
+.env
+mongodb.txt
+test.js
+.next
+config.env
