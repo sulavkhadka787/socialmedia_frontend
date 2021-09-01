@@ -14,7 +14,7 @@ import {
   FooterMessage,
 } from "../components/Common/WelcomeMessage";
 
-export const regexUserName = /^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/;
+const regexUserName = /^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/;
 
 function Signup() {
   const [user, setUser] = useState({
