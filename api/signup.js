@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const UserModel = require("../models/UserModel");
 const ProfileModel = require("../models/ProfileModel");
-const FollowerModel = require("../models/ProfileModel");
+const FollowerModel = require("../models/FollowerModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const isEmail = require("validator/lib/isEmail");
@@ -13,7 +13,7 @@ const regexUserName = /^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/;
 
 router.get("/:username", async (req, res) => {
   const { username } = req.params;
-
+  console.log("username=>params=>>", username);
   try {
     if (username.length < 1) return res.status(401).send("Invalid");
 
@@ -40,6 +40,8 @@ router.post("/", async (req, res) => {
     twitter,
     instagram,
   } = req.body.user;
+
+  console.log("bio==>>>>>>>", bio);
 
   if (!isEmail(email)) return res.status(401).send("Invalid Email");
 
@@ -75,6 +77,8 @@ router.post("/", async (req, res) => {
     if (instagram) profileFields.social.instagram = instagram;
     if (twitter) profileFields.social.twitter = twitter;
 
+    console.log("profile-fiels--------=>", profileFields);
+
     await new ProfileModel(profileFields).save();
     await new FollowerModel({
       user: user._id,
@@ -94,7 +98,7 @@ router.post("/", async (req, res) => {
     );
   } catch (error) {
     console.error(error);
-    return res.status(500).send("Server error");
+    return res.status(500).send("Server error signup");
   }
 });
 
