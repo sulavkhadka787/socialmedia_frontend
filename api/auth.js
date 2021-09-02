@@ -6,6 +6,7 @@ const FollowerModel = require("../models/ProfileModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const isEmail = require("validator/lib/isEmail");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const regexUserName = /^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/;
 
