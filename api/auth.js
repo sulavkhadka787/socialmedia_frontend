@@ -8,7 +8,18 @@ const bcrypt = require("bcryptjs");
 const isEmail = require("validator/lib/isEmail");
 const authMiddleware = require("../middleware/authMiddleware");
 
-const regexUserName = /^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/;
+router.get("/", authMiddleware, async (req, res) => {
+  console.log("get/api/auth=========>>>>", req);
+  const { userId } = req;
+  try {
+    const user = await UserModel.findById(userId);
+    const userFollowStats = await FollowerModel.findOne({ user: userId });
+    return res.status(200).json({ user, userFollowStats });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send(`Server Error`);
+  }
+});
 
 router.post("/", async (req, res) => {
   const { email, password } = req.body.user;
