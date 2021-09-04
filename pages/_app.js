@@ -1,4 +1,3 @@
-import App from "next/app";
 import Layout from "../components/Layout/Layout";
 import "semantic-ui-css/semantic.min.css";
 import axios from "axios";
@@ -7,47 +6,44 @@ import baseUrl from "../utils/baseUrl";
 import { redirectUser } from "../utils/authUser";
 import "react-toastify/dist/ReactToastify.css";
 
-class MyApp extends App {
-  static async getInitialProps({ Component, ctx }) {
-    const { token } = parseCookies(ctx);
-    let pageProps = {};
+function MyApp({ Component, pageProps }) {
+  return (
+    <Layout {...pageProps}>
+      <Component {...pageProps} />
+    </Layout>
+  );
+}
 
-    const protectedRoutes = ctx.pathname === "/";
+MyApp.getInitialProps = async ({ Component, ctx }) => {
+  const { token } = parseCookies(ctx);
+  let pageProps = {};
 
-    if (!token) {
-      protectedRoutes && redirectUser(ctx, "/login");
-    } else {
-      if (Component.getInitialProps) {
-        pageProps = await Component.getInitialProps(ctx);
-      }
+  const protectedRoutes = ctx.pathname === "/";
 
-      try {
-        const res = await axios.get(`${baseUrl}/api/auth`, {
-          headers: { Authorization: token },
-        });
-        const { user, userFollowStats } = res.data;
-
-        if (user) !protectedRoutes && redirectUser(ctx, "/");
-
-        pageProps.user = user;
-        pageProps.userFollowStats = userFollowStats;
-      } catch (error) {
-        destroyCookie(ctx, "token");
-        redirectUser(ctx, "/login");
-      }
+  if (!token) {
+    protectedRoutes && redirectUser(ctx, "/login");
+  } else {
+    if (Component.getInitialProps) {
+      pageProps = await Component.getInitialProps(ctx);
     }
 
-    return { pageProps };
-  }
-  render() {
-    const { Component, pageProps } = this.props;
+    try {
+      const res = await axios.get(`${baseUrl}/api/auth`, {
+        headers: { Authorization: token },
+      });
+      const { user, userFollowStats } = res.data;
 
-    return (
-      <Layout {...pageProps}>
-        <Component {...pageProps} />
-      </Layout>
-    );
+      if (user) !protectedRoutes && redirectUser(ctx, "/");
+
+      pageProps.user = user;
+      pageProps.userFollowStats = userFollowStats;
+    } catch (error) {
+      destroyCookie(ctx, "token");
+      redirectUser(ctx, "/login");
+    }
   }
-}
+
+  return { pageProps };
+};
 
 export default MyApp;

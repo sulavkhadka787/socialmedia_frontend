@@ -9,7 +9,6 @@ const isEmail = require("validator/lib/isEmail");
 const authMiddleware = require("../middleware/authMiddleware");
 
 router.get("/", authMiddleware, async (req, res) => {
-  console.log("get/api/auth=========>>>>", req);
   const { userId } = req;
   try {
     const user = await UserModel.findById(userId);
