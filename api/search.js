@@ -4,18 +4,16 @@ const authMiddleware = require("../middleware/authMiddleware");
 const UserModel = require("../models/UserModel");
 
 router.get("/:searchText", authMiddleware, async (req, res) => {
-  const { searchText } = req.params;
-
-  if (searchText.length === 0) return;
-
   try {
-    let userPattern = new RegExp(`^${searchText}`);
+    const { searchText } = req.params;
+
+    if (searchText.length === 0) return;
 
     const results = await UserModel.find({
-      name: { $regex: userPattern, $options: "i" },
+      name: { $regex: searchText, $options: "i" },
     });
 
-    res.json(results);
+    return res.status(200).json(results);
   } catch (error) {
     console.error(error);
     return res.status(500).send(`Server Error`);
