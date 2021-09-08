@@ -10,6 +10,7 @@ const uuid = require("uuid").v4;
 
 router.post("/", authMiddleware, async (req, res) => {
   const { text, location, picUrl } = req.body;
+  console.log("pic-url==>>", picUrl);
 
   if (text.length < 1)
     return res.status(401).send("Text must be atleast 1 charater");
@@ -24,7 +25,9 @@ router.post("/", authMiddleware, async (req, res) => {
     if (picUrl) newPost.picUrl = picUrl;
 
     const post = await new PostModel(newPost).save();
-    return res.json(post._id);
+
+    const postCreated = await PostModel.findById(post._id).populate("user");
+    return res.json(postCreated);
   } catch (error) {
     console.error(error);
     return res.status(500).send(`Server error`);

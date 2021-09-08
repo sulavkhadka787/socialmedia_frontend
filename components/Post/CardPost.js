@@ -8,12 +8,13 @@ import {
   Button,
   Popup,
   Header,
-  Modal,
 } from "semantic-ui-react";
 import PostComments from "./PostComments";
 import CommentInputField from "./CommentInputField";
 import calculateTime from "../../utils/calculateTime";
+import { deletePost, likePost } from "../../utils/postActions";
 import Link from "next/Link";
+import LikesList from "./LikesList";
 
 function CardPost({ post, user, setPosts, setShowToastr }) {
   const [likes, setLikes] = useState(post.likes);
@@ -64,7 +65,14 @@ function CardPost({ post, user, setPosts, setShowToastr }) {
                 >
                   <Header as="h4" content="Are you sure? " />
                   <p>This action is irreversible!!</p>
-                  <Button color="red" icon="trash" content="Delete" />
+                  <Button
+                    color="red"
+                    icon="trash"
+                    content="Delete"
+                    onClick={() =>
+                      deletePost(post._id, setPosts, setShowToastr)
+                    }
+                  />
                 </Popup>
               </>
             )}
@@ -93,13 +101,27 @@ function CardPost({ post, user, setPosts, setShowToastr }) {
               name={isLiked ? "heart" : "heart outline"}
               color="red"
               style={{ cursor: "pointer" }}
+              onClick={() =>
+                likePost(post._id, user._id, setLikes, isLiked ? false : true)
+              }
             />
 
-            {likes.length > 0 && (
+            {/* {likes.length > 0 && (
               <span className="spanLikesList">
                 {`${likes.length} ${likes.length === 1 ? "like" : "likes"}`}
               </span>
-            )}
+            )} */}
+
+            <LikesList
+              postId={post._id}
+              trigger={
+                likes.length > 0 && (
+                  <span className="spanLikesList">
+                    {`${likes.length} ${likes.length === 1 ? "like" : "likes"}`}
+                  </span>
+                )
+              }
+            />
 
             <Icon
               name="comment outline"
