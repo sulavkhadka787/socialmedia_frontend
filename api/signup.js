@@ -75,8 +75,6 @@ router.post("/", async (req, res) => {
     if (instagram) profileFields.social.instagram = instagram;
     if (twitter) profileFields.social.twitter = twitter;
 
-    console.log("profile-fiels--------=>", profileFields);
-
     await new ProfileModel(profileFields).save();
     await new FollowerModel({
       user: user._id,

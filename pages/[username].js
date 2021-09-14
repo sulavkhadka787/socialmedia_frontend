@@ -23,6 +23,7 @@ function ProfilePage({
   user,
   userFollowStats,
 }) {
+  console.log("userrrrr", user);
   const router = useRouter();
 
   const [posts, setPosts] = useState([]);

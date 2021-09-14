@@ -1,31 +1,33 @@
 import React, { useState, useRef } from "react";
-import { Form, Button, Divider, Message } from "semantic-ui-react";
-import uploadPic from "../../utils/uploadPicToCloudinary";
+import { Form, Button, Message, Divider } from "semantic-ui-react";
 import ImageDropDiv from "../Common/ImageDropDiv";
-import CommonInput from "../Common/CommonInputs";
+import CommonInputs from "../Common/CommonInputs";
+import uploadPic from "../../utils/uploadPicToCloudinary";
 import { profileUpdate } from "../../utils/profileActions";
 
 function UpdateProfile({ Profile }) {
   const [profile, setProfile] = useState({
     profilePicUrl: Profile.user.profilePicUrl,
-    bio: Profile.bio,
+    bio: Profile.bio || "",
     facebook: (Profile.social && Profile.social.facebook) || "",
-    instagram: (Profile.social && Profile.social.instagram) || "",
     youtube: (Profile.social && Profile.social.youtube) || "",
-    twitter: (Profile.social && Profile.social.facebook) || "",
+    instagram: (Profile.social && Profile.social.instagram) || "",
+    twitter: (Profile.social && Profile.social.twitter) || "",
   });
 
-  const [media, setMedia] = useState(null);
-  const [mediaPreview, setMediaPreview] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
-  const [loading, setLoading] = useState(false);
 
+  const [loading, setLoading] = useState(false);
   const [showSocialLinks, setShowSocialLinks] = useState(false);
+
   const [highlighted, setHighlighted] = useState(false);
   const inputRef = useRef();
+  const [media, setMedia] = useState(null);
+  const [mediaPreview, setMediaPreview] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+
     if (name === "media") {
       setMedia(files[0]);
       setMediaPreview(URL.createObjectURL(files[0]));
@@ -36,8 +38,8 @@ function UpdateProfile({ Profile }) {
   return (
     <>
       <Form
-        loading={loading}
         error={errorMsg !== null}
+        loading={loading}
         onSubmit={async (e) => {
           e.preventDefault();
           setLoading(true);
@@ -57,12 +59,13 @@ function UpdateProfile({ Profile }) {
         }}
       >
         <Message
+          onDismiss={() => setErrorMsg(false)}
           error
-          onDismiss={() => setErrorMsg(null)}
           content={errorMsg}
-          header="Oops"
           attached
+          header="Oops!"
         />
+
         <ImageDropDiv
           inputRef={inputRef}
           highlighted={highlighted}
@@ -73,17 +76,20 @@ function UpdateProfile({ Profile }) {
           setMedia={setMedia}
           profilePicUrl={profile.profilePicUrl}
         />
-        <CommonInput
+
+        <CommonInputs
           user={profile}
           handleChange={handleChange}
           showSocialLinks={showSocialLinks}
           setShowSocialLinks={setShowSocialLinks}
         />
-        <Divider />
+
+        <Divider hidden />
+
         <Button
           color="blue"
-          disabled={profile.bio === "" || loading}
           icon="pencil alternate"
+          disabled={profile.bio === "" || loading}
           content="Submit"
           type="submit"
         />

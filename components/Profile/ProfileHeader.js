@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import {
   Segment,
-  Grid,
   Image,
+  Grid,
   Divider,
   Header,
   Button,
   List,
 } from "semantic-ui-react";
-import { followUser, unFollowUser } from "../../utils/profileActions";
+import { followUser, unfollowUser } from "../../utils/profileActions";
 
 function ProfileHeader({
   profile,
@@ -33,9 +33,10 @@ function ProfileHeader({
               <Header
                 as="h2"
                 content={profile.user.name}
-                style={{ marginTop: "5px" }}
+                style={{ marginBottom: "5px" }}
               />
             </Grid.Row>
+
             <Grid.Row stretched>
               {profile.bio}
               <Divider hidden />
@@ -43,63 +44,61 @@ function ProfileHeader({
 
             <Grid.Row>
               {profile.social ? (
-                <>
-                  <List>
+                <List>
+                  <List.Item>
+                    <List.Icon name="mail" />
+                    <List.Content content={profile.user.email} />
+                  </List.Item>
+
+                  {profile.social.facebook && (
                     <List.Item>
-                      <List.Icon name="mail" />
-                      <List.Content content={profile.user.email} />
+                      <List.Icon name="facebook" color="blue" />
+                      <List.Content
+                        style={{ color: "blue" }}
+                        content={profile.social.facebook}
+                      />
                     </List.Item>
+                  )}
 
-                    {profile.social.facebook && (
-                      <List.Item>
-                        <List.Icon name="facebook" color="blue" />
-                        <List.Content
-                          content={profile.social.facebook}
-                          style={{ color: "blue" }}
-                        />
-                      </List.Item>
-                    )}
+                  {profile.social.instagram && (
+                    <List.Item>
+                      <List.Icon name="instagram" color="red" />
+                      <List.Content
+                        style={{ color: "blue" }}
+                        content={profile.social.instagram}
+                      />
+                    </List.Item>
+                  )}
 
-                    {profile.social.instagram && (
-                      <List.Item>
-                        <List.Icon name="instagram" color="red" />
-                        <List.Content
-                          content={profile.social.instagram}
-                          style={{ color: "blue" }}
-                        />
-                      </List.Item>
-                    )}
+                  {profile.social.youtube && (
+                    <List.Item>
+                      <List.Icon name="youtube" color="red" />
+                      <List.Content
+                        style={{ color: "blue" }}
+                        content={profile.social.youtube}
+                      />
+                    </List.Item>
+                  )}
 
-                    {profile.social.youtube && (
-                      <List.Item>
-                        <List.Icon name="youtube" color="red" />
-                        <List.Content
-                          content={profile.social.youtube}
-                          style={{ color: "blue" }}
-                        />
-                      </List.Item>
-                    )}
-
-                    {profile.social.twitter && (
-                      <List.Item>
-                        <List.Icon name="twitter" color="blue" />
-                        <List.Content
-                          content={profile.social.twitter}
-                          style={{ color: "blue" }}
-                        />
-                      </List.Item>
-                    )}
-                  </List>
-                </>
+                  {profile.social.twitter && (
+                    <List.Item>
+                      <List.Icon name="twitter" color="blue" />
+                      <List.Content
+                        style={{ color: "blue" }}
+                        content={profile.social.twitter}
+                      />
+                    </List.Item>
+                  )}
+                </List>
               ) : (
-                <>No Social Media Links</>
+                <>No Social Media Links </>
               )}
             </Grid.Row>
           </Grid.Column>
 
           <Grid.Column width={5} stretched style={{ textAlign: "center" }}>
             <Grid.Row>
-              <Image src={profile.user.profilePicUrl} avatar size="large" />
+              <Image size="large" avatar src={profile.user.profilePicUrl} />
             </Grid.Row>
             <br />
 
@@ -114,7 +113,7 @@ function ProfileHeader({
                 onClick={async () => {
                   setLoading(true);
                   isFollowing
-                    ? await unFollowUser(profile.user._id, setUserFollowStats)
+                    ? await unfollowUser(profile.user._id, setUserFollowStats)
                     : await followUser(profile.user._id, setUserFollowStats);
                   setLoading(false);
                 }}

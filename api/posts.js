@@ -10,7 +10,6 @@ const uuid = require("uuid").v4;
 
 router.post("/", authMiddleware, async (req, res) => {
   const { text, location, picUrl } = req.body;
-  console.log("pic-url==>>", picUrl);
 
   if (text.length < 1)
     return res.status(401).send("Text must be atleast 1 charater");

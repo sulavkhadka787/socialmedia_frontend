@@ -5,13 +5,14 @@ import cookie from "js-cookie";
 import Router from "next/router";
 
 const Axios = axios.create({
-  baseUrl: `${baseUrl}/api/profile`,
+  baseURL: `${baseUrl}/api/profile`,
   headers: { Authorization: cookie.get("token") },
 });
 
 export const followUser = async (userToFollowId, setUserFollowStats) => {
   try {
     await Axios.post(`/follow/${userToFollowId}`);
+
     setUserFollowStats((prev) => ({
       ...prev,
       following: [...prev.following, { user: userToFollowId }],
@@ -21,9 +22,10 @@ export const followUser = async (userToFollowId, setUserFollowStats) => {
   }
 };
 
-export const unFollowUser = async (userToUnfollowId, setUserFollowStats) => {
+export const unfollowUser = async (userToUnfollowId, setUserFollowStats) => {
   try {
     await Axios.put(`/unfollow/${userToUnfollowId}`);
+
     setUserFollowStats((prev) => ({
       ...prev,
       following: prev.following.filter(
