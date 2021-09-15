@@ -7,11 +7,16 @@ import {
   List,
   Checkbox,
 } from "semantic-ui-react";
-import UpdateProfile from "./UpdateProfile";
+import { passwordUpdate, toggleMessagePopup } from "../../utils/profileActions";
 
 function Settings({ newMessagePopup }) {
   const [showUpdatePassword, setShowUpdatePassword] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const [showMessageSettings, setShowMessageSettings] = useState(false);
+  const [popupSetting, setPopupSetting] = useState(newMessagePopup);
+
+  const isFirstRun = useRef(true);
 
   useEffect(() => {
     success && setTimeout(() => setSuccess(false), 3000);
@@ -42,6 +47,37 @@ function Settings({ newMessagePopup }) {
             />
           )}
         </List.Item>
+        <Divider />
+
+        <List.Item>
+          <List.Icon
+            name="paper plane outline"
+            size="large"
+            verticalAlign="middle"
+          />
+
+          <List.Content>
+            <List.Header
+              onClick={() => setShowMessageSettings(!showMessageSettings)}
+              as="a"
+              content="Show New Message Popup"
+            />
+          </List.Content>
+
+          {showMessageSettings && (
+            <div style={{ marginTop: "10px" }}>
+              Control whether a Popup should appear when there is a new message?
+              <br />
+              <Checkbox
+                checked={popupSetting}
+                toggle
+                onChange={() => {
+                  toggleMessagePopup(popupSetting, setPopupSetting, setSuccess);
+                }}
+              />
+            </div>
+          )}
+        </List.Item>
       </List>
     </>
   );
@@ -69,12 +105,22 @@ const UpdatePassword = ({ setSuccess, setShowUpdatePassword }) => {
     setUserPasswords((prev) => ({ ...prev, [name]: value }));
   };
 
+  useEffect(() => {
+    errorMsg !== null && setTimeout(() => setErrorMsg(null), 5000);
+  }, [errorMsg]);
+
   return (
     <>
       <Form
         error={errorMsg !== null}
         loading={loading}
-        onSubmit={(e) => e.preventDefault()}
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setLoading(true);
+          await passwordUpdate(setSuccess, userPasswords);
+          setLoading(false);
+          setShowUpdatePassword(false);
+        }}
       >
         <List.List>
           <List.Item>
@@ -140,7 +186,7 @@ const UpdatePassword = ({ setSuccess, setShowUpdatePassword }) => {
           </List.Item>
         </List.List>
       </Form>
-      <Divider />
+      <Divider hidden />
     </>
   );
 };
