@@ -115,9 +115,48 @@ const removeCommentNotification = async (
   }
 };
 
+const newFollowerNotfication = async (userId, userToNotifyId) => {
+  try {
+    const user = await NotificationModel.findOne({ user: userToNotifyId });
+    const newNotification = {
+      type: "newFollower",
+      user: userId,
+      date: Date.now(),
+    };
+
+    await user.notifications.unshift(newNotification);
+    await user.save();
+    await setNotificationToUnread(userToNotifyId);
+    return;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const removeFollowerNotification = async (userId, userToNotifyId) => {
+  try {
+    const user = await NotificationModel.findOne({ user: userToNotifyId });
+    const notificationToRemove = await user.notification.find(
+      (notification) =>
+        notification.type === "newFollower" &&
+        notification.user.toString() === userId
+    );
+
+    const indexOf = await user.notifications
+      .map((notification) => notification._id.toString())
+      .indexOf(notificationToRemove._id.toString());
+
+    await user.notifications.splice(indexOf, 1);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 module.exports = {
   newLikeNotification,
   removeLikeNotification,
   newCommentNotification,
   removeCommentNotification,
+  newFollowerNotfication,
+  removeFollowerNotification,
 };
