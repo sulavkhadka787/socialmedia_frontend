@@ -21,11 +21,13 @@ router.get("/:username", async (req, res) => {
     if (!regexUserName.test(username)) return res.status(401).send("Invalid");
 
     const user = await UserModel.findOne({ username: username.toLowerCase() });
+
     if (user) return res.status(401).send("Username already taken");
+
     return res.status(200).send("Available");
   } catch (error) {
     console.error(error);
-    return res.status(500).send("Server error");
+    return res.status(500).send(`Server error`);
   }
 });
 
@@ -62,6 +64,7 @@ router.post("/", async (req, res) => {
       password,
       profilePicUrl: req.body.profilePicUrl || userPng,
     });
+
     user.password = await bcrypt.hash(password, 10);
     await user.save();
 
@@ -96,7 +99,7 @@ router.post("/", async (req, res) => {
     );
   } catch (error) {
     console.error(error);
-    return res.status(500).send("Server error signup");
+    return res.status(500).send(`Server error`);
   }
 });
 

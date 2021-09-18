@@ -3,18 +3,18 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import baseUrl from "../utils/baseUrl";
 import { parseCookies } from "nookies";
-import { NoProfile, NoProfilePosts } from "../components/Layout/NoData";
-import cookie from "js-cookie";
 import { Grid } from "semantic-ui-react";
+import { NoProfilePosts, NoProfile } from "../components/Layout/NoData";
+import CardPost from "../components/Post/CardPost";
+import cookie from "js-cookie";
+import { PlaceHolderPosts } from "../components/Layout/PlaceHolderGroup";
 import ProfileMenuTabs from "../components/Profile/ProfileMenuTabs";
 import ProfileHeader from "../components/Profile/ProfileHeader";
-import CardPost from "../components/Post/CardPost";
-import { PlaceHolderPosts } from "../components/Layout/PlaceHolderGroup";
-import { PostDeleteToastr } from "../components/Layout/Toastr";
 import Followers from "../components/Profile/Followers";
 import Following from "../components/Profile/Following";
 import UpdateProfile from "../components/Profile/UpdateProfile";
 import Settings from "../components/Profile/Settings";
+import { PostDeleteToastr } from "../components/Layout/Toastr";
 
 function ProfilePage({
   errorLoading,
@@ -24,18 +24,16 @@ function ProfilePage({
   user,
   userFollowStats,
 }) {
-  console.log("userrrrr", user);
   const router = useRouter();
 
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showToastr, setShowToastr] = useState(false);
 
   const [activeItem, setActiveItem] = useState("profile");
-  const handleItemClick = (item) => setActiveItem(item);
+  const handleItemClick = (clickedTab) => setActiveItem(clickedTab);
 
   const [loggedUserFollowStats, setUserFollowStats] = useState(userFollowStats);
-
-  const [showToastr, setShowToastr] = useState(false);
 
   const ownAccount = profile.user._id === user._id;
 
@@ -65,12 +63,13 @@ function ProfilePage({
   }, [router.query.username]);
 
   useEffect(() => {
-    showToastr && setTimeout(() => setShowToastr(false), 3000);
+    showToastr && setTimeout(() => setShowToastr(false), 4000);
   }, [showToastr]);
 
   return (
     <>
       {showToastr && <PostDeleteToastr />}
+
       <Grid stackable>
         <Grid.Row>
           <Grid.Column>
@@ -95,6 +94,7 @@ function ProfilePage({
                   loggedUserFollowStats={loggedUserFollowStats}
                   setUserFollowStats={setUserFollowStats}
                 />
+
                 {loading ? (
                   <PlaceHolderPosts />
                 ) : posts.length > 0 ? (

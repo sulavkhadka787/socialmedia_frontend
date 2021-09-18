@@ -180,7 +180,7 @@ router.put("/unfollow/:userToUnfollowId", authMiddleware, async (req, res) => {
     await userToUnfollow.followers.splice(removeFollower, 1);
     await userToUnfollow.save();
 
-    await removeFollowerNotification(userId, userToFollowId);
+    await removeFollowerNotification(userId, userToUnfollowId);
 
     return res.status(200).send("Updated");
   } catch (error) {
@@ -198,7 +198,7 @@ router.post("/update", authMiddleware, async (req, res) => {
       req.body;
 
     let profileFields = {};
-    profileFields.user = userId;
+    profileFields.user = user._id;
 
     profileFields.bio = bio;
 
@@ -251,7 +251,7 @@ router.post("/settings/password", authMiddleware, async (req, res) => {
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
-    return res.status(200).send("Updated successfully");
+    res.status(200).send("Updated successfully");
   } catch (error) {
     console.error(error);
     return res.status(500).send("Server Error");

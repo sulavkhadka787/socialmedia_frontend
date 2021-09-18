@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const UserModel = require("../models/UserModel");
-const ProfileModel = require("../models/ProfileModel");
 const FollowerModel = require("../models/FollowerModel");
 const NotificationModel = require("../models/NotificationModel");
 const jwt = require("jsonwebtoken");
@@ -11,13 +10,16 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 router.get("/", authMiddleware, async (req, res) => {
   const { userId } = req;
+
   try {
     const user = await UserModel.findById(userId);
+
     const userFollowStats = await FollowerModel.findOne({ user: userId });
+
     return res.status(200).json({ user, userFollowStats });
   } catch (error) {
     console.error(error);
-    return res.status(500).send(`Server Error`);
+    return res.status(500).send(`Server error`);
   }
 });
 
@@ -34,6 +36,7 @@ router.post("/", async (req, res) => {
     const user = await UserModel.findOne({ email: email.toLowerCase() }).select(
       "+password"
     );
+
     if (!user) {
       return res.status(401).send("Invalid Credentials");
     }
@@ -58,12 +61,12 @@ router.post("/", async (req, res) => {
       { expiresIn: "2d" },
       (err, token) => {
         if (err) throw err;
-        return res.status(200).json(token);
+        res.status(200).json(token);
       }
     );
   } catch (error) {
     console.error(error);
-    return res.status(500).send("Server error");
+    return res.status(500).send(`Server error`);
   }
 });
 
