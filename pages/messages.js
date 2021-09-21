@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import io from "socket.io-client";
 import axios from "axios";
 import baseUrl from "../utils/baseUrl";
 import { parseCookies } from "nookies";
@@ -18,13 +19,65 @@ import { NoMessages } from "../components/Layout/NoData";
 function Messages({ chatsData, user }) {
   const [chats, setChats] = useState(chatsData);
   const router = useRouter();
+  const [connectedUsers, setConnectedUsers] = useState([]);
+
+  const socket = useRef();
+
+  const [messages, setMessages] = useState([]);
+  const [bannerData, setBannerData] = useState({ name: "", profilePicUrl: "" });
+
+  //This ref is for persisting the state of query string in the url throughout re-renders
+  //This ref is the query string inside url
+
+  const openChatId = useRef();
 
   useEffect(() => {
-    if (chats.length > 0)
+    if (!socket.current) {
+      socket.current = io(baseUrl);
+    }
+
+    if (socket.current) {
+      socket.current.emit("join", { userId: user._id });
+
+      socket.current.on("connectedUsers", ({ users }) => {
+        users.length > 0 && setConnectedUsers(users);
+      });
+    }
+    if (chats.length > 0 && !router.query.message) {
       router.push(`/messages?message=${chats[0].messagesWith}`, undefined, {
         shallow: true,
       });
+    }
+    return () => {
+      if (socket.current) {
+        socket.current.emit("disconnect");
+        socket.current.off();
+      }
+    };
   }, []);
+
+  useEffect(() => {
+    const loadMessages = () => {
+      socket.current.emit("loadMessages", {
+        userId: user._id,
+        messagesWith: router.query.message,
+      });
+    };
+
+    socket.current.on("messagesLoaded", ({ chat }) => {
+      setMessages(chat.messages);
+      setBannerData({
+        name: chat.messagesWith.name,
+        profilePicUrl: chat.messagesWith.profilePicUrl,
+      });
+      openChatId.current = chat.messagesWith._id;
+      console.log(chat);
+    });
+
+    if (socket.current) {
+      loadMessages();
+    }
+  }, [router.query.message]);
 
   return (
     <>
@@ -37,7 +90,7 @@ function Messages({ chatsData, user }) {
         />
         <Divider hidden />
         <div style={{ marginBottom: "10px" }}>
-          <ChatListSearch user={user} chats={chats} setChats={setChats} />
+          <ChatListSearch chats={chats} setChats={setChats} />
         </div>
 
         {chats.length > 0 ? (
@@ -50,7 +103,12 @@ function Messages({ chatsData, user }) {
                     style={{ overflow: "auto", maxHeight: "32rem" }}
                   >
                     {chats.map((chat, i) => (
-                      <Chat key={i} chat={chat} setChats={setChats} />
+                      <Chat
+                        connectedUsers={connectedUsers}
+                        key={i}
+                        chat={chat}
+                        setChats={setChats}
+                      />
                     ))}
                   </Segment>
                 </Comment.Group>
