@@ -18,6 +18,7 @@ import { NoMessages } from "../components/Layout/NoData";
 import Banner from "../components/Messages/Banner";
 import MessageInputField from "../components/Messages/MessageInputField";
 import Message from "../components/Messages/Message";
+import getUserInfo from "../utils/getUserInfo";
 
 function Messages({ chatsData, user }) {
   const [chats, setChats] = useState(chatsData);
@@ -34,6 +35,7 @@ function Messages({ chatsData, user }) {
 
   const openChatId = useRef();
 
+  //connection
   useEffect(() => {
     if (!socket.current) {
       socket.current = io(baseUrl);
@@ -59,6 +61,7 @@ function Messages({ chatsData, user }) {
     };
   }, []);
 
+  //loading messages
   useEffect(() => {
     const loadMessages = () => {
       socket.current.emit("loadMessages", {
@@ -77,10 +80,48 @@ function Messages({ chatsData, user }) {
       console.log(chat);
     });
 
-    if (socket.current) {
-      loadMessages();
-    }
+    socket.current.on("noChatFound", async () => {
+      const { name, profilePicUrl } = await getUserInfo(router.query.message);
+
+      setBannerData({ name, profilePicUrl });
+      setMessages([]);
+
+      openChatId.current = router.query.message;
+    });
+
+    if (socket.current && router.query.message) loadMessages();
   }, [router.query.message]);
+
+  const sendMsg = (msg) => {
+    if (socket.current) {
+      socket.current.emit("sendNewMsg", {
+        userId: user._id,
+        msgSendToUserId: openChatId.current,
+        msg,
+      });
+    }
+  };
+
+  //Confirming msg is sent and receiving the message
+  useEffect(() => {
+    if (socket.current) {
+      socket.current.on("msgSent", ({ newMsg }) => {
+        if (newMsg.receiver === openChatId.current) {
+          setMessages((prev) => [...prev, newMsg]);
+
+          setChats((prev) => {
+            const previousChat = prev.find(
+              (chat) => chat.messagesWith === newMsg.receiver
+            );
+            previousChat.lastMessage = newMsg.msg;
+            previousChat.date = newMsg.date;
+
+            return [...prev];
+          });
+        }
+      });
+    }
+  }, []);
 
   return (
     <>
@@ -130,12 +171,11 @@ function Messages({ chatsData, user }) {
                       }}
                     >
                       <>
+                        <div style={{ position: "sticky", top: "0" }}>
+                          <Banner bannerData={bannerData} />
+                        </div>
                         {messages.length > 0 && (
                           <>
-                            <div style={{ position: "sticky", top: "0" }}>
-                              <Banner bannerData={bannerData} />
-                            </div>
-
                             {messages.map((message, i) => (
                               <Message
                                 key={i}
@@ -150,11 +190,7 @@ function Messages({ chatsData, user }) {
                         )}
                       </>
                     </div>
-                    <MessageInputField
-                      socket={socket}
-                      user={user}
-                      messagesWith={openChatId.current}
-                    />
+                    <MessageInputField sendMsg={sendMsg} />
                   </>
                 )}
               </Grid.Column>
