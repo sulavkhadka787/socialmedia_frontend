@@ -11,8 +11,16 @@ const connectDb = require("./utilsServer/connectDb");
 connectDb();
 app.use(express.json()); // this is the body parser
 const PORT = process.env.PORT || 3000;
-const { addUser, removeUser } = require("./utilsServer/roomActions");
-const { loadMessages, sendMsg } = require("./utilsServer/messageActions");
+const {
+  addUser,
+  removeUser,
+  findConnectedUser,
+} = require("./utilsServer/roomActions");
+const {
+  loadMessages,
+  sendMsg,
+  setMsgToUnread,
+} = require("./utilsServer/messageActions");
 
 io.on("connection", (socket) => {
   socket.on("join", async ({ userId }) => {
@@ -39,6 +47,15 @@ io.on("connection", (socket) => {
 
   socket.on("sendNewMsg", async ({ userId, msgSendToUserId, msg }) => {
     const { newMsg, error } = await sendMsg(userId, msgSendToUserId, msg);
+    //check if user is online
+    const receiverSocket = findConnectedUser(msgSendToUserId);
+
+    if (receiverSocket) {
+      //when you want to send msg to a particualr socket
+      io.to(receiverSocket.socketId).emit("newMsgReceived", { newMsg });
+    } else {
+      await setMsgToUnread(msgSendToUserId);
+    }
     if (!error) {
       socket.emit("msgSent", { newMsg });
     }
