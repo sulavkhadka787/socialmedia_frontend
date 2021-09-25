@@ -20,6 +20,7 @@ import MessageInputField from "../components/Messages/MessageInputField";
 import Message from "../components/Messages/Message";
 import getUserInfo from "../utils/getUserInfo";
 import newMsgSound from "../utils/newMsgSound";
+import cookie from "js-cookie";
 
 const scrollDivToBottom = (divRef) => {
   divRef.current !== null &&
@@ -184,6 +185,36 @@ function Messages({ chatsData, user }) {
     messages.length > 0 && scrollDivToBottom(divRef);
   }, [messages]);
 
+  const deleteMsg = (messageId) => {
+    if (socket.current) {
+      socket.current.emit(`deleteMsg`, {
+        userId: user._id,
+        messagesWith: openChatId.current,
+        messageId,
+      });
+
+      socket.current.on("msgDeleted", () => {
+        setMessages((prev) =>
+          prev.filter((message) => message._id !== messageId)
+        );
+      });
+    }
+  };
+
+  const deleteChat = async (messagesWith) => {
+    try {
+      await axios.delete(`${baseUrl}/api/chats/${messagesWith}`, {
+        headers: { Authorization: cookie.get("token") },
+      });
+      setChats((prev) =>
+        prev.filter((chat) => chat.messagesWith !== messagesWith)
+      );
+      router.push("/message", undefined, { shallow: true });
+    } catch (error) {
+      alert("Error Deleting chat");
+    }
+  };
+
   return (
     <>
       <Segment padded basic size="large" style={{ marginTop: "5px" }}>
@@ -212,7 +243,7 @@ function Messages({ chatsData, user }) {
                         connectedUsers={connectedUsers}
                         key={i}
                         chat={chat}
-                        setChats={setChats}
+                        deleteChat={deleteChat}
                       />
                     ))}
                   </Segment>
@@ -245,7 +276,7 @@ function Messages({ chatsData, user }) {
                                 message={message}
                                 user={user}
                                 setMessages={setMessages}
-                                messagesWith={openChatId.current}
+                                deleteMsg={deleteMsg}
                               />
                             ))}
                           </>
