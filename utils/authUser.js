@@ -7,7 +7,7 @@ import cookie from "js-cookie";
 export const registerUser = async (
   user,
   profilePicUrl,
-  setError,
+  setErrorMsg,
   setLoading
 ) => {
   try {
@@ -19,7 +19,7 @@ export const registerUser = async (
   } catch (error) {
     console.log("catch=error=>>", error);
     const errorMsg = catchErrors(error);
-    setError(errorMsg);
+    setErrorMsg(errorMsg);
   }
   setLoading(false);
 };

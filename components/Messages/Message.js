@@ -3,6 +3,7 @@ import { Icon, Popup } from "semantic-ui-react";
 import calculateTime from "../../utils/calculateTime";
 
 const Message = ({ message, user, deleteMsg, bannerProfilePic, divRef }) => {
+  console.log("message:::", message);
   const [deleteIcon, showDeleteIcon] = useState(false);
 
   const ifYouSender = message.sender === user._id;

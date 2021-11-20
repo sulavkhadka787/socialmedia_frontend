@@ -26,7 +26,8 @@ function Chat({ chat, connectedUsers, deleteChat }) {
             <Comment.Avatar src={chat.profilePicUrl} />
             <Comment.Content>
               <Comment.Author as="a">
-                {chat.name}{" "}
+                {chat.name}
+                {" +++++ "}
                 {isOnline && <Icon name="circle" size="small" color="green" />}
               </Comment.Author>
               <Comment.Metadata>
